@@ -125,6 +125,8 @@ Route::get('/email/verify', function () {
 
 Route::get('/email/verify/{id}/{hash}', function (\Illuminate\Foundation\Auth\EmailVerificationRequest $request) {
     $request->fulfill();
+    $user = $request->user();
+    $user->update(['status_akun' => 'aktif']);
     return redirect()->route('login')->with('success', 'Email berhasil diverifikasi! Silakan masuk.');
 })->middleware(['auth', 'signed'])->name('verification.verify');
 
@@ -147,20 +149,20 @@ Route::middleware(['auth'])->group(function () {
         })->name('admin.dashboard');
     });
 
-    Route::middleware('role:relawan')->group(function () {
+    Route::middleware(['role:relawan', 'verified'])->group(function () {
         Route::get('/relawan/dashboard', function () {
             return view('dashboard.relawan');
         })->name('relawan.dashboard');
     });
 
-    Route::middleware('role:donatur')->group(function () {
+    Route::middleware(['role:donatur', 'verified'])->group(function () {
         Route::get('/donatur/dashboard', [DonorDashboardController::class, 'index'])->name('donatur.dashboard');
 
         Route::get('/dashboard/donatur/riwayat', [DonorDashboardController::class, 'history'])->name('donatur.riwayat');
     });
 
     // ─── Profil Relawan (REQ-12) ──────────────────────────────
-    Route::middleware('role:relawan')->group(function () {
+    Route::middleware(['role:relawan', 'verified'])->group(function () {
         Route::get('/relawan/profil', [RelawanController::class, 'profil'])->name('relawan.profil');
         Route::post('/relawan/profil', [RelawanController::class, 'store'])->name('relawan.profil.store');
         Route::put('/relawan/profil', [RelawanController::class, 'update'])->name('relawan.profil.update');

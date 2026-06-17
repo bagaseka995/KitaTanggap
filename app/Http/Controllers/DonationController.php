@@ -191,6 +191,9 @@ class DonationController extends Controller
             return response()->json(['message' => 'Order not found'], 404);
         }
 
+        // Simpan status lama untuk cek idempotensi
+        $oldStatus = $donasi->status_bayar;
+
         // Mapping status Midtrans → status internal
         $newStatus = $midtrans->mapTransactionStatus($transactionStatus, $fraudStatus);
 
@@ -201,7 +204,7 @@ class DonationController extends Controller
         ]);
 
         // Jika sukses → kirim email bukti donasi (REQ-21)
-        if ($newStatus === 'sukses') {
+        if ($newStatus === 'sukses' && $oldStatus !== 'sukses') {
             $donasi->load('bencana');
             SendDonationReceiptJob::dispatch($donasi);
         }

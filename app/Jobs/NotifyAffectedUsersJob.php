@@ -42,7 +42,7 @@ class NotifyAffectedUsersJob implements ShouldQueue
         $fcmService = new FcmService();
 
         foreach ($users as $user) {
-            Mail::to($user->email)->queue(new BencanaAlert($this->bencana));
+            Mail::to($user->email)->send(new BencanaAlert($this->bencana));
 
             // Kirim notifikasi FCM jika user memiliki token
             foreach ($user->fcmTokens as $fcmToken) {

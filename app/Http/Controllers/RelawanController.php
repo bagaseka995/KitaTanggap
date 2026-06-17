@@ -38,7 +38,7 @@ class RelawanController extends Controller
             'pengalaman'        => $request->pengalaman,
             'lokasi_domisili'   => $request->lokasi_domisili,
             'ketersediaan'      => $request->boolean('ketersediaan'),
-            'status_verifikasi' => 'terverifikasi', // langsung terverifikasi untuk kemudahan demo
+            'status_verifikasi' => 'pending',
         ]);
 
         return back()->with('success', 'Profil relawan berhasil disimpan!');
@@ -58,7 +58,7 @@ class RelawanController extends Controller
             'pengalaman'        => $request->pengalaman,
             'lokasi_domisili'   => $request->lokasi_domisili,
             'ketersediaan'      => $request->boolean('ketersediaan'),
-            'status_verifikasi' => 'terverifikasi', // langsung terverifikasi untuk kemudahan demo
+            'status_verifikasi' => 'pending',
         ]);
 
         return back()->with('success', 'Profil relawan berhasil diperbarui.');
