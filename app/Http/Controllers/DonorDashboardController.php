@@ -15,9 +15,18 @@ class DonorDashboardController extends Controller
     public function index(): View
     {
         $userId = auth()->id();
+        $userEmail = auth()->user()->email;
 
-        $totalDonation = Donasi::where('user_id', $userId)->sukses()->sum('nominal');
-        $totalTransactions = Donasi::where('user_id', $userId)->count();
+        $totalDonation = Donasi::where(function ($query) use ($userId, $userEmail) {
+            $query->where('user_id', $userId)
+                  ->orWhere('email_donatur', $userEmail);
+        })->sukses()->sum('nominal');
+
+        $totalTransactions = Donasi::where(function ($query) use ($userId, $userEmail) {
+            $query->where('user_id', $userId)
+                  ->orWhere('email_donatur', $userEmail);
+        })->count();
+
         $activeDisasters = Bencana::where('status_aktif', true)->count();
 
         return view('dashboard.donatur', compact('totalDonation', 'totalTransactions', 'activeDisasters'));
@@ -29,11 +38,14 @@ class DonorDashboardController extends Controller
     public function history(Request $request): View
     {
         $userId = auth()->id();
+        $userEmail = auth()->user()->email;
 
-        // Query donasi yang hanya dimiliki oleh pengguna saat ini (user_id = auth()->id())
-        // Jika donasi dilakukan saat belum login (user_id = null), donasi tidak muncul di riwayat ini.
+        // Query donasi yang dimiliki oleh pengguna saat ini (berdasarkan user_id atau email)
         $query = Donasi::with('bencana')
-            ->where('user_id', $userId)
+            ->where(function ($q) use ($userId, $userEmail) {
+                $q->where('user_id', $userId)
+                  ->orWhere('email_donatur', $userEmail);
+            })
             ->orderBy('created_at', 'desc');
 
         // Filter opsional: status_bayar (form GET parameter)
